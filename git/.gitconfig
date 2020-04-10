@@ -1,0 +1,10 @@
+[user]
+	email = feser@csail.mit.edu
+	name = Jack Feser
+[core]
+	editor = nano
+	excludesfile = /Users/jack/.gitignore_global
+[http]
+	postBuffer = 524288000
+[status]
+	submoduleSummary = true
