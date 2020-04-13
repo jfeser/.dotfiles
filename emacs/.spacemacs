@@ -68,7 +68,7 @@ This function should only modify configuration layer settings."
    ;; To use a local version of a package, use the `:location' property:
    ;; '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
-   dotspacemacs-additional-packages '(blacken)
+   dotspacemacs-additional-packages '(blacken org-roam)
 
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -498,7 +498,6 @@ dump."
 (defun dotspacemacs/org-roam-config ()
   (use-package org-roam
     :after org
-    :load-path "private/local/org-roam"
     :hook
     ((org-mode . org-roam-mode)
      (after-init . org-roam--build-cache-async) ;; optional!
