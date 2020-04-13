@@ -480,20 +480,20 @@ dump."
   (add-hook 'python-mode-hook #'lsp))
 
 (defun dotspacemacs/ocaml-config ()
-  (let ((opam-share
-         (ignore-errors (car (process-lines "opam" "config" "var" "share")))))
-	  (when (and opam-share (file-directory-p opam-share))
-      ;; Set up ocaml site lisp
-      (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
+  (require 'opam-user-setup "~/.emacs.d/opam-user-setup.el")
 
-	    ))
+  ;; Set up opam switch
+  (opam-update-env "4.09.1")
+
+  ;; Set up ocaml site lisp
+  (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
 
   (defun my-tuareg-mode-hook ()
     (key-chord-define tuareg-mode-map "qq" "~")
 
     (require 'ocamlformat)
     (add-hook 'before-save-hook #'ocamlformat-before-save))
-  (add-hook 'tuareg-mode-hook 'my-tuareg-mode-hook))
+  (opam-setup-add-ocaml-hook 'my-tuareg-mode-hook))
 
 (defun dotspacemacs/org-roam-config ()
   (use-package org-roam
@@ -590,24 +590,21 @@ This function is called at the very end of Spacemacs initialization."
  '(lsp-enable-indentation nil)
  '(lsp-enable-symbol-highlighting nil)
  '(lsp-log-io nil)
- '(lsp-ocaml-lsp-server-command
-   '("/Users/jack/ocaml-workspace/_build/default/ocaml-lsp/ocaml-lsp-server/src/main.exe"))
+ '(lsp-ocaml-lsp-server-command '("ocamllsp"))
  '(lsp-prefer-flymake nil)
  '(lsp-print-performance t)
  '(lsp-signature-doc-lines 5)
- '(lsp-ui-doc-enable nil)
+ '(lsp-ui-doc-enable nil t)
  '(lsp-ui-flycheck-enable t)
  '(lsp-ui-flycheck-list-position 'bottom)
  '(lsp-ui-imenu-enable t)
  '(lsp-ui-peek-enable nil)
- '(lsp-ui-sideline-enable nil)
- '(lsp-ui-sideline-ignore-duplicate t)
- '(lsp-ui-sideline-show-symbol nil)
+ '(lsp-ui-sideline-enable nil t)
+ '(lsp-ui-sideline-ignore-duplicate t t)
+ '(lsp-ui-sideline-show-symbol nil t)
  '(mu4e-maildir "/Users/jack/.mail")
- '(ocamlformat-command "/Users/jack/.opam/4.08.1/bin/ocamlformat")
  '(ocamlformat-enable 'disable-outside-detected-project)
  '(ocamlformat-show-errors 'echo)
- '(ocp-indent-path "/Users/jack/.opam/4.08.1/bin/ocp-indent")
  '(org-agenda-files nil)
  '(org-enforce-todo-dependencies t)
  '(org-export-with-smart-quotes t)
