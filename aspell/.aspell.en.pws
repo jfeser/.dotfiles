@@ -1,4 +1,5 @@
-personal_ws-1.1 en 139 
+personal_ws-1.1 en 144 
+ACM
 APIs
 ASTs
 AVX
@@ -11,10 +12,12 @@ CPUs
 CYK
 Civilizer
 Cocke
+Coq
 DBMSs
 DSL
 DSLs
 DemoMatch
+Demomatch
 EUSolver
 Earley
 Earley's
@@ -32,6 +35,7 @@ PCFGs
 Postgres
 RDBMS
 RodentStore
+SIGMOD
 SIMT
 SMP
 SMT
@@ -62,6 +66,7 @@ dataset
 datasets
 datastore
 deallocation
+declaratively
 deduplicated
 dereference
 dereferences
