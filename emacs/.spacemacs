@@ -33,7 +33,10 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(
+   '(javascript
+     graphviz
+     yaml
+     shell-scripts
      ;; Extensions of spacemacs-base
      helm
      spacemacs-completion
@@ -68,7 +71,7 @@ This function should only modify configuration layer settings."
    ;; To use a local version of a package, use the `:location' property:
    ;; '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
-   dotspacemacs-additional-packages '(blacken org-roam)
+   dotspacemacs-additional-packages '(blacken org-roam direnv)
 
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -474,7 +477,7 @@ dump."
   (global-set-key (kbd "C-c C-x") 'flycheck-next-error)
   (global-set-key (kbd "C-c C-l") 'lsp-find-definition)
 
-  (add-hook 'tuareg-mode-hook #'lsp)
+  (add-hook 'tuareg-mode-hook #'lsp-deferred)
   (add-hook 'c-mode-hook #'lsp)
   (add-hook 'c++-mode-hook #'lsp)
   (add-hook 'python-mode-hook #'lsp))
@@ -491,6 +494,10 @@ dump."
   (defun my-tuareg-mode-hook ()
     (key-chord-define tuareg-mode-map "qq" "~")
 
+    (setq prettify-symbols-alist
+          (assoc-delete-all "|]" (assoc-delete-all "[|" prettify-symbols-alist)))
+    (prettify-symbols-mode)
+
     (require 'ocamlformat)
     (add-hook 'before-save-hook #'ocamlformat-before-save))
   (opam-setup-add-ocaml-hook 'my-tuareg-mode-hook))
@@ -503,7 +510,7 @@ dump."
      (after-init . org-roam--build-cache-async) ;; optional!
      )
     :custom
-    (org-roam-directory "/Users/jack/work/zettel")
+    (org-roam-directory "~/work/zettel")
     :bind
     ("C-c n l" . org-roam)
     ("C-c n t" . org-roam-today)
@@ -521,6 +528,7 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
+  (direnv-mode)
   (key-chord-mode 1)
   (delete-selection-mode 1)
 
@@ -575,7 +583,10 @@ This function is called at the very end of Spacemacs initialization."
  '(custom-safe-themes
    '("fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" default))
  '(evil-want-Y-yank-to-eol nil)
+ '(exec-path
+   '("/home/feser/.opam/4.09.1/bin" "/home/feser/.local/bin" "/usr/local/sbin" "/usr/local/bin" "/usr/sbin" "/usr/bin" "/sbin" "/bin" "/usr/games" "/usr/local/games" "/snap/bin" "/snap/emacs/current/usr/libexec/emacs/27.0.91/x86_64-pc-linux-gnu"))
  '(flycheck-dafny-executable "~/software/dafny/Binaries/dafny")
+ '(flycheck-pos-tip-mode nil)
  '(flycheck-python-flake8-executable "python3")
  '(flycheck-python-pycompile-executable "python3")
  '(haskell-stylish-on-save t t)
@@ -590,22 +601,21 @@ This function is called at the very end of Spacemacs initialization."
  '(lsp-enable-indentation nil)
  '(lsp-enable-symbol-highlighting nil)
  '(lsp-log-io nil)
- '(lsp-ocaml-lsp-server-command '("ocamllsp"))
  '(lsp-prefer-flymake nil)
  '(lsp-print-performance t)
  '(lsp-signature-doc-lines 5)
- '(lsp-ui-doc-enable nil t)
+ '(lsp-ui-doc-enable nil)
  '(lsp-ui-flycheck-enable t)
  '(lsp-ui-flycheck-list-position 'bottom)
  '(lsp-ui-imenu-enable t)
  '(lsp-ui-peek-enable nil)
- '(lsp-ui-sideline-enable nil t)
- '(lsp-ui-sideline-ignore-duplicate t t)
- '(lsp-ui-sideline-show-symbol nil t)
+ '(lsp-ui-sideline-enable nil)
+ '(lsp-ui-sideline-ignore-duplicate t)
+ '(lsp-ui-sideline-show-symbol nil)
  '(mu4e-maildir "/Users/jack/.mail")
  '(ocamlformat-enable 'disable-outside-detected-project)
  '(ocamlformat-show-errors 'echo)
- '(org-agenda-files nil)
+ '(org-agenda-files '("~/work/fastdb_paper/todo.org"))
  '(org-enforce-todo-dependencies t)
  '(org-export-with-smart-quotes t)
  '(org-hierarchical-todo-statistics nil)
@@ -617,7 +627,7 @@ This function is called at the very end of Spacemacs initialization."
  '(org-ref-default-bibliography '("~/work/references.bib"))
  '(org-todo-keywords '((sequence "TODO" "TURNIN" "|" "DONE" "CANCELED")))
  '(package-selected-packages
-   '(hledger-mode phpunit phpcbf php-extras php-auto-yasnippets drupal-mode company-php ac-php-core xcscope php-mode blacken treepy graphql writegood-mode fstar-mode boogie-friends dockerfile-mode docker docker-tramp rvm ruby-tools ruby-test-mode rubocop rspec-mode robe rbenv rake minitest chruby bundler inf-ruby sql-indent org-mime mu4e-maildirs-extension mu4e-alert ht synosaurus web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data ghub let-alist graphviz-dot-mode z3-mode web-beautify livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc company-tern tern coffee-mode csv-mode disaster company-c-headers cmake-mode clang-format insert-shebang fish-mode company-shell dash-functional company-coq company-math math-symbol-lists mmm-mode markdown-toc markdown-mode gh-md yaml-mode intero hlint-refactor hindent helm-hoogle haskell-snippets flycheck-haskell company-ghci company-ghc ghc haskell-mode company-cabal cmm-mode whole-line-or-region unfill mwim git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter diff-hl helm-company helm-c-yasnippet fuzzy flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck company-statistics company-auctex company-anaconda company auto-yasnippet yasnippet auto-dictionary ac-ispell auto-complete utop tuareg caml reveal-in-osx-finder pbcopy osx-trash osx-dictionary org-ref pdf-tools key-chord ivy tablist ocp-indent merlin launchctl helm-bibtex parsebib biblio biblio-core auctex-latexmk auctex smeargle orgit org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download magit-gitflow htmlize helm-gitignore gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magit magit-popup git-commit with-editor yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode anaconda-mode pythonic ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed dash aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))
+   '(tide typescript-mode prettier-js nodejs-repl import-js grizzl impatient-mode dap-mode posframe bui treemacs pfuture add-node-modules-path vterm lsp-treemacs helm-dash helm-gtags ggtags flycheck-bashate counsel-gtags counsel swiper hledger-mode phpunit phpcbf php-extras php-auto-yasnippets drupal-mode company-php ac-php-core xcscope php-mode blacken treepy graphql writegood-mode fstar-mode boogie-friends dockerfile-mode docker docker-tramp rvm ruby-tools ruby-test-mode rubocop rspec-mode robe rbenv rake minitest chruby bundler inf-ruby sql-indent org-mime mu4e-maildirs-extension mu4e-alert ht synosaurus web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data ghub let-alist graphviz-dot-mode z3-mode web-beautify livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc company-tern tern coffee-mode csv-mode disaster company-c-headers cmake-mode clang-format insert-shebang fish-mode company-shell dash-functional company-coq company-math math-symbol-lists mmm-mode markdown-toc markdown-mode gh-md yaml-mode intero hlint-refactor hindent helm-hoogle haskell-snippets flycheck-haskell company-ghci company-ghc ghc haskell-mode company-cabal cmm-mode whole-line-or-region unfill mwim git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter diff-hl helm-company helm-c-yasnippet fuzzy flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck company-statistics company-auctex company-anaconda company auto-yasnippet yasnippet auto-dictionary ac-ispell auto-complete utop tuareg caml reveal-in-osx-finder pbcopy osx-trash osx-dictionary org-ref pdf-tools key-chord ivy tablist ocp-indent merlin launchctl helm-bibtex parsebib biblio biblio-core auctex-latexmk auctex smeargle orgit org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download magit-gitflow htmlize helm-gitignore gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magit magit-popup git-commit with-editor yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode anaconda-mode pythonic ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed dash aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))
  '(paradox-github-token t)
  '(password-cache-expiry nil)
  '(proof-electric-terminator-enable t)
@@ -625,7 +635,34 @@ This function is called at the very end of Spacemacs initialization."
  '(proof-three-window-mode-policy 'smart t)
  '(reftex-bibpath-environment-variables '("BIBINPUTS" "TEXBIB" "~/work/references.bib"))
  '(safe-local-variable-values
-   '((eval set
+   '((eval lsp-register-client
+           (make-lsp-client :new-connection
+                            (lsp-stdio-connection
+                             (lambda nil "/home/feser/ocaml-workspace/staged-synth/_opam/bin/ocamllsp"))
+                            :major-modes
+                            '(caml-mode tuareg-mode)
+                            :server-id 'ocaml-lsp-server-staged-synth))
+     (lsp-enabled-clients 'ocaml-lsp-server-staged-synth)
+     (eval lsp-register-client
+           (make-lsp-client :new-connection
+                            (lsp-stdio-connection
+                             (lambda nil "/home/feser/ocaml-workspace/staged-synth/_opam/bin/ocamllsp"))
+                            :major-modes
+                            '(caml-mode tuareg-mode)
+                            :priority 10 :server-id 'ocaml-lsp-server-staged-synth))
+     (ocp-indent-path . "/home/feser/ocaml-workspace/staged-synth/_opam/bin/ocp-indent")
+     (ocp-indent-path "/home/feser/ocaml-workspace/staged-synth/_opam/bin/ocp-indent")
+     (ocp-indent-path "~/ocaml-workspace/staged-synth/_opam/bin/ocp-indent")
+     (ocp-indent-path
+      (concat
+       (projectile-project-root)
+       "_opam/bin/ocp-indent"))
+     (eval progn
+           (add-to-list 'exec-path
+                        (concat
+                         (locate-dominating-file default-directory dir-locals-file)
+                         "_opam/bin")))
+     (eval set
            (make-local-variable 'project-path)
            (locate-dominating-file default-directory ".dir-locals.el"))
      (eval setq merlin-command
@@ -652,9 +689,8 @@ This function is called at the very end of Spacemacs initialization."
            "%`%l -interaction=nonstopmode %(mode)%' %t")
      (eval add-hook 'before-save-hook #'ocamlformat-before-save nil t)
      (TeX-master . main)))
- '(tuareg-font-lock-symbols t)
  '(tuareg-prettify-symbols-full t)
- '(tuareg-support-metaocaml t)
+ '(vterm-shell "/usr/bin/fish")
  '(z3-solver-cmd "z3"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -662,5 +698,6 @@ This function is called at the very end of Spacemacs initialization."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(flycheck-warning ((t (:underline "#dc752f"))))
+ '(helm-ff-file-extension ((t (:extend t))))
  '(tuareg-font-lock-extension-node-face ((t (:inherit tuareg-font-lock-infix-extension-node-face)))))
 )
