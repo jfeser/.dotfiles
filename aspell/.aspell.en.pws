@@ -1,4 +1,4 @@
-personal_ws-1.1 en 144 
+personal_ws-1.1 en 153 
 ACM
 APIs
 ASTs
@@ -31,14 +31,17 @@ LLVM's
 MCMC
 MonetDB
 OLAP
+ORMs
 PCFGs
 Postgres
 RDBMS
 RodentStore
 SIGMOD
+SIMD
 SIMT
 SMP
 SMT
+STL
 Selinger
 Skylake
 Stratego
@@ -62,12 +65,14 @@ cardinalities
 centric
 combinators
 compilable
+compositional
 dataset
 datasets
 datastore
 deallocation
 declaratively
 deduplicated
+deduplication
 dereference
 dereferences
 dereferencing
@@ -89,6 +94,8 @@ malloc
 natively
 nonterminal
 optimizers
+overapproximate
+overapproximation
 parallelization
 parallelize
 parallelizeable
@@ -107,6 +114,7 @@ precomputed
 precomputes
 precomputing
 prejoining
+prepend
 priori
 prover
 reassociating
@@ -140,6 +148,7 @@ useable
 vectorization
 vectorize
 vectorized
+vectorizing
 verifier
 vlsi
 wavefront
