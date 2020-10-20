@@ -26,17 +26,15 @@ This function should only modify configuration layer settings."
    ;; a layer lazily. (default t)
    dotspacemacs-ask-for-lazy-installation t
 
-   ;; If non-nil layers with lazy install support are lazy installed.
    ;; List of additional paths where to look for configuration layers.
    ;; Paths must have a trailing slash (i.e. `~/.mycontribs/')
    dotspacemacs-configuration-layer-path '()
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(javascript
-     graphviz
-     yaml
-     shell-scripts
+   '(rust
+     javascript
+     sql
      ;; Extensions of spacemacs-base
      helm
      spacemacs-completion
@@ -47,7 +45,6 @@ This function should only modify configuration layer settings."
      spacemacs-visual
 
      osx
-     spell-checking
      version-control
      auto-completion
      git
@@ -62,6 +59,9 @@ This function should only modify configuration layer settings."
      latex
      ocaml
      python
+     graphviz
+     yaml
+     shell-scripts
      )
 
    ;; List of additional packages that will be installed without being
@@ -77,7 +77,7 @@ This function should only modify configuration layer settings."
    dotspacemacs-frozen-packages '()
 
    ;; A list of packages that will not be installed and loaded.
-   dotspacemacs-excluded-packages '(flycheck-ocaml merlin)
+   dotspacemacs-excluded-packages '(flycheck-ocaml merlin ocp-indent)
 
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
@@ -102,18 +102,18 @@ It should only modify the values of Spacemacs settings."
    ;; (default nil)
    dotspacemacs-enable-emacs-pdumper nil
 
-   ;; File path pointing to emacs 27.1 executable compiled with support
-   ;; for the portable dumper (this is currently the branch pdumper).
-   ;; (default "emacs-27.0.50")
-   dotspacemacs-emacs-pdumper-executable-file "emacs-27.0.60"
+   ;; Name of executable file pointing to emacs 27+. This executable must be
+   ;; in your PATH.
+   ;; (default "emacs")
+   dotspacemacs-emacs-pdumper-executable-file "emacs"
 
    ;; Name of the Spacemacs dump file. This is the file will be created by the
    ;; portable dumper in the cache directory under dumps sub-directory.
    ;; To load it when starting Emacs add the parameter `--dump-file'
    ;; when invoking Emacs 27.1 executable on the command line, for instance:
-   ;;   ./emacs --dump-file=~/.emacs.d/.cache/dumps/spacemacs.pdmp
-   ;; (default spacemacs.pdmp)
-   dotspacemacs-emacs-dumper-dump-file "spacemacs.pdmp"
+   ;;   ./emacs --dump-file=$HOME/.emacs.d/.cache/dumps/spacemacs-27.1.pdmp
+   ;; (default (format "spacemacs-%s.pdmp" emacs-version))
+   dotspacemacs-emacs-dumper-dump-file (format "spacemacs-%s.pdmp" emacs-version)
 
    ;; If non-nil ELPA repositories are contacted via HTTPS whenever it's
    ;; possible. Set it to nil if you have no way to use HTTPS in your
@@ -133,20 +133,29 @@ It should only modify the values of Spacemacs settings."
    ;; (default '(100000000 0.1))
    dotspacemacs-gc-cons '(100000000 0.1)
 
+   ;; Set `read-process-output-max' when startup finishes.
+   ;; This defines how much data is read from a foreign process.
+   ;; Setting this >= 1 MB should increase performance for lsp servers
+   ;; in emacs 27.
+   ;; (default (* 1024 1024))
+   dotspacemacs-read-process-output-max (* 1024 1024)
+
    ;; If non-nil then Spacelpa repository is the primary source to install
    ;; a locked version of packages. If nil then Spacemacs will install the
-   ;; latest version of packages from MELPA. (default nil)
+   ;; latest version of packages from MELPA. Spacelpa is currently in
+   ;; experimental state please use only for testing purposes.
+   ;; (default nil)
    dotspacemacs-use-spacelpa nil
 
    ;; If non-nil then verify the signature for downloaded Spacelpa archives.
-   ;; (default nil)
-   dotspacemacs-verify-spacelpa-archives nil
+   ;; (default t)
+   dotspacemacs-verify-spacelpa-archives t
 
    ;; If non-nil then spacemacs will check for updates at startup
    ;; when the current branch is not `develop'. Note that checking for
    ;; new versions works via git commands, thus it calls GitHub services
    ;; whenever you start Emacs. (default nil)
-   dotspacemacs-check-for-update t
+   dotspacemacs-check-for-update nil
 
    ;; If non-nil, a form that evaluates to a package directory. For example, to
    ;; use different package directories for different Emacs versions, set this
@@ -161,8 +170,10 @@ It should only modify the values of Spacemacs settings."
    ;; (default 'vim)
    dotspacemacs-editing-style 'emacs
 
-   ;; If non-nil output loading progress in `*Messages*' buffer. (default nil)
-   dotspacemacs-verbose-loading nil
+   ;; If non-nil show the version string in the Spacemacs buffer. It will
+   ;; appear as (spacemacs version)@(emacs version)
+   ;; (default t)
+   dotspacemacs-startup-buffer-show-version t
 
    ;; Specify the startup banner. Default value is `official', it displays
    ;; the official spacemacs logo. An integer value is the index of text
@@ -242,8 +253,10 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-major-mode-leader-key ","
 
    ;; Major mode leader key accessible in `emacs state' and `insert state'.
-   ;; (default "C-M-m")
-   dotspacemacs-major-mode-emacs-leader-key "C-M-m"
+   ;; (default "C-M-m" for terminal mode, "<M-return>" for GUI mode).
+   ;; Thus M-RET should work as leader key in both GUI and terminal modes.
+   ;; C-M-m also should work in terminal mode, but not in GUI mode.
+   dotspacemacs-major-mode-emacs-leader-key (if window-system "<M-return>" "C-M-m")
 
    ;; These variables control whether separate commands are bound in the GUI to
    ;; the key pairs `C-i', `TAB' and `C-m', `RET'.
@@ -373,7 +386,7 @@ It should only modify the values of Spacemacs settings."
    ;; (default nil)
    dotspacemacs-line-numbers nil
 
-   ;; Code folding method. Possible values are `evil' and `origami'.
+   ;; Code folding method. Possible values are `evil', `origami' and `vimish'.
    ;; (default 'evil)
    dotspacemacs-folding-method 'evil
 
@@ -382,7 +395,7 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-smartparens-strict-mode nil
 
    ;; If non-nil pressing the closing parenthesis `)' key in insert mode passes
-   ;; over any automatically added closing parenthesis, bracket, quote, etc…
+   ;; over any automatically added closing parenthesis, bracket, quote, etc...
    ;; This can be temporary disabled by pressing `C-q' before `)'. (default nil)
    dotspacemacs-smart-closing-parenthesis nil
 
@@ -441,6 +454,20 @@ It should only modify the values of Spacemacs settings."
    ;; (default nil)
    dotspacemacs-whitespace-cleanup nil
 
+   ;; If non nil activate `clean-aindent-mode' which tries to correct
+   ;; virtual indentation of simple modes. This can interfer with mode specific
+   ;; indent handling like has been reported for `go-mode'.
+   ;; If it does deactivate it here.
+   ;; (default t)
+   dotspacemacs-use-clean-aindent-mode t
+
+   ;; If non-nil shift your number row to match the entered keyboard layout
+   ;; (only in insert state). Currently supported keyboard layouts are:
+   ;; `qwerty-us', `qwertz-de' and `querty-ca-fr'.
+   ;; New layouts can be added in `spacemacs-editing' layer.
+   ;; (default nil)
+   dotspacemacs-swap-number-row nil
+
    ;; Either nil or a number of seconds. If non-nil zone out after the specified
    ;; number of seconds. (default nil)
    dotspacemacs-zone-out-when-idle nil
@@ -448,7 +475,11 @@ It should only modify the values of Spacemacs settings."
    ;; Run `spacemacs/prettify-org-buffer' when
    ;; visiting README.org files of Spacemacs.
    ;; (default nil)
-   dotspacemacs-pretty-docs nil))
+   dotspacemacs-pretty-docs nil
+
+   ;; If nil the home buffer shows the full path of agenda items
+   ;; and todos. If non nil only the file name is shown.
+   dotspacemacs-home-shorten-agenda-source nil))
 
 (defun dotspacemacs/user-env ()
   "Environment variables setup.
@@ -486,7 +517,7 @@ dump."
   (require 'opam-user-setup "~/.emacs.d/opam-user-setup.el")
 
   ;; Set up opam switch
-  (opam-update-env "4.09.1")
+  (opam-update-env "4.10.0")
 
   ;; Set up ocaml site lisp
   (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
@@ -500,6 +531,7 @@ dump."
 
     (require 'ocamlformat)
     (add-hook 'before-save-hook #'ocamlformat-before-save))
+
   (opam-setup-add-ocaml-hook 'my-tuareg-mode-hook))
 
 (defun dotspacemacs/org-roam-config ()
@@ -528,6 +560,7 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
+  (editorconfig-mode -1)
   (direnv-mode)
   (key-chord-mode 1)
   (delete-selection-mode 1)
@@ -584,7 +617,7 @@ This function is called at the very end of Spacemacs initialization."
    '("fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" default))
  '(evil-want-Y-yank-to-eol nil)
  '(exec-path
-   '("/home/feser/.opam/4.09.1/bin" "/home/feser/.local/bin" "/usr/local/sbin" "/usr/local/bin" "/usr/sbin" "/usr/bin" "/sbin" "/bin" "/usr/games" "/usr/local/games" "/snap/bin" "/snap/emacs/current/usr/libexec/emacs/27.0.91/x86_64-pc-linux-gnu"))
+   '("/home/feser/.opam/4.10.0/bin" "/home/feser/.local/bin" "/usr/local/sbin" "/usr/local/bin" "/usr/sbin" "/usr/bin" "/sbin" "/bin" "/usr/games" "/usr/local/games" "/snap/bin" "/snap/emacs/current/usr/libexec/emacs/27.0.91/x86_64-pc-linux-gnu"))
  '(flycheck-dafny-executable "~/software/dafny/Binaries/dafny")
  '(flycheck-pos-tip-mode nil)
  '(flycheck-python-flake8-executable "python3")
@@ -601,6 +634,7 @@ This function is called at the very end of Spacemacs initialization."
  '(lsp-enable-indentation nil)
  '(lsp-enable-symbol-highlighting nil)
  '(lsp-log-io nil)
+ '(lsp-modeline-diagnostics-enable nil)
  '(lsp-prefer-flymake nil)
  '(lsp-print-performance t)
  '(lsp-signature-doc-lines 5)
@@ -627,7 +661,7 @@ This function is called at the very end of Spacemacs initialization."
  '(org-ref-default-bibliography '("~/work/references.bib"))
  '(org-todo-keywords '((sequence "TODO" "TURNIN" "|" "DONE" "CANCELED")))
  '(package-selected-packages
-   '(tide typescript-mode prettier-js nodejs-repl import-js grizzl impatient-mode dap-mode posframe bui treemacs pfuture add-node-modules-path vterm lsp-treemacs helm-dash helm-gtags ggtags flycheck-bashate counsel-gtags counsel swiper hledger-mode phpunit phpcbf php-extras php-auto-yasnippets drupal-mode company-php ac-php-core xcscope php-mode blacken treepy graphql writegood-mode fstar-mode boogie-friends dockerfile-mode docker docker-tramp rvm ruby-tools ruby-test-mode rubocop rspec-mode robe rbenv rake minitest chruby bundler inf-ruby sql-indent org-mime mu4e-maildirs-extension mu4e-alert ht synosaurus web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data ghub let-alist graphviz-dot-mode z3-mode web-beautify livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc company-tern tern coffee-mode csv-mode disaster company-c-headers cmake-mode clang-format insert-shebang fish-mode company-shell dash-functional company-coq company-math math-symbol-lists mmm-mode markdown-toc markdown-mode gh-md yaml-mode intero hlint-refactor hindent helm-hoogle haskell-snippets flycheck-haskell company-ghci company-ghc ghc haskell-mode company-cabal cmm-mode whole-line-or-region unfill mwim git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter diff-hl helm-company helm-c-yasnippet fuzzy flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck company-statistics company-auctex company-anaconda company auto-yasnippet yasnippet auto-dictionary ac-ispell auto-complete utop tuareg caml reveal-in-osx-finder pbcopy osx-trash osx-dictionary org-ref pdf-tools key-chord ivy tablist ocp-indent merlin launchctl helm-bibtex parsebib biblio biblio-core auctex-latexmk auctex smeargle orgit org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download magit-gitflow htmlize helm-gitignore gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magit magit-popup git-commit with-editor yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode anaconda-mode pythonic ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed dash aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))
+   '(toml-mode ron-mode racer flycheck-rust cargo rust-mode lsp-origami sqlup-mode tide typescript-mode prettier-js nodejs-repl import-js grizzl impatient-mode dap-mode posframe bui treemacs pfuture add-node-modules-path vterm lsp-treemacs helm-dash helm-gtags ggtags flycheck-bashate counsel-gtags counsel swiper hledger-mode phpunit phpcbf php-extras php-auto-yasnippets drupal-mode company-php ac-php-core xcscope php-mode blacken treepy graphql writegood-mode fstar-mode boogie-friends dockerfile-mode docker docker-tramp rvm ruby-tools ruby-test-mode rubocop rspec-mode robe rbenv rake minitest chruby bundler inf-ruby sql-indent org-mime mu4e-maildirs-extension mu4e-alert ht synosaurus web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data ghub let-alist graphviz-dot-mode z3-mode web-beautify livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc company-tern tern coffee-mode csv-mode disaster company-c-headers cmake-mode clang-format insert-shebang fish-mode company-shell dash-functional company-coq company-math math-symbol-lists mmm-mode markdown-toc markdown-mode gh-md yaml-mode intero hlint-refactor hindent helm-hoogle haskell-snippets flycheck-haskell company-ghci company-ghc ghc haskell-mode company-cabal cmm-mode whole-line-or-region unfill mwim git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter diff-hl helm-company helm-c-yasnippet fuzzy flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck company-statistics company-auctex company-anaconda company auto-yasnippet yasnippet auto-dictionary ac-ispell auto-complete utop tuareg caml reveal-in-osx-finder pbcopy osx-trash osx-dictionary org-ref pdf-tools key-chord ivy tablist ocp-indent merlin launchctl helm-bibtex parsebib biblio biblio-core auctex-latexmk auctex smeargle orgit org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download magit-gitflow htmlize helm-gitignore gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magit magit-popup git-commit with-editor yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode anaconda-mode pythonic ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed dash aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))
  '(paradox-github-token t)
  '(password-cache-expiry nil)
  '(proof-electric-terminator-enable t)
@@ -650,13 +684,6 @@ This function is called at the very end of Spacemacs initialization."
                             :major-modes
                             '(caml-mode tuareg-mode)
                             :priority 10 :server-id 'ocaml-lsp-server-staged-synth))
-     (ocp-indent-path . "/home/feser/ocaml-workspace/staged-synth/_opam/bin/ocp-indent")
-     (ocp-indent-path "/home/feser/ocaml-workspace/staged-synth/_opam/bin/ocp-indent")
-     (ocp-indent-path "~/ocaml-workspace/staged-synth/_opam/bin/ocp-indent")
-     (ocp-indent-path
-      (concat
-       (projectile-project-root)
-       "_opam/bin/ocp-indent"))
      (eval progn
            (add-to-list 'exec-path
                         (concat
@@ -689,6 +716,7 @@ This function is called at the very end of Spacemacs initialization."
            "%`%l -interaction=nonstopmode %(mode)%' %t")
      (eval add-hook 'before-save-hook #'ocamlformat-before-save nil t)
      (TeX-master . main)))
+ '(tuareg-electric-indent t)
  '(tuareg-prettify-symbols-full t)
  '(vterm-shell "/usr/bin/fish")
  '(z3-solver-cmd "z3"))
