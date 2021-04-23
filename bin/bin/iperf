@@ -1,0 +1,5 @@
+#!/bin/sh
+
+UID=$(whoami)
+PID=$(ps -U "$UID" u | fzf --tac | awk '{print $2}')
+perf record -F 150 --call-graph=dwarf -p "$PID"
